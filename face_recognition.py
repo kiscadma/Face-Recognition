@@ -47,7 +47,7 @@ def learn(target_name="George_W_Bush", target_count=530):
         trn_lbls.append(lbl)
         trn_data.append(random_rotation(pic_arr, 15))  # add a rotated version of the picture
         trn_lbls.append(lbl)
-        trn_data.append(random_rotation(pic_arr, 15))
+        trn_data.append(random_rotation(pic_arr, 30))
         trn_lbls.append(lbl)
 
     # add the remaining data to the test data sets
@@ -74,7 +74,6 @@ def learn(target_name="George_W_Bush", target_count=530):
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Convolution2D(150, kernel_size=(3, 3)))
     model.add(Flatten())
-    # model.add(Dense(300))
     model.add(Dropout(.74))
     model.add(Dense(1, activation='sigmoid'))  # Output Layer. 1==target, 0==not target
     model.compile(optimizer=opt, loss='binary_crossentropy', metrics=['accuracy'])
