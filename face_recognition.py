@@ -2,7 +2,7 @@ import keras, glob, os
 import numpy as np
 from keras.preprocessing.image import load_img, img_to_array, random_rotation
 from keras.layers import Convolution2D, MaxPooling2D, Dropout, Flatten, Dense
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '4'
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
 def learn(target_name="George_W_Bush", target_count=530):
@@ -16,10 +16,11 @@ def learn(target_name="George_W_Bush", target_count=530):
         all_data.append((img_to_array(load_img(pic, color_mode="grayscale", target_size=target_size)), 1))
 
     f = open('lfw-names.txt')
-    for line in f:
+    lines = f.readlines()
+    np.random.shuffle(lines)  # randomize which non-target photos are included
+    for line in lines:
         info = line.split()
-
-        if info[0] is target_name:  # let's not add the target twice
+        if info[0] == target_name:  # let's not add the target twice
             continue
 
         # add all photos for the non-target person with the 0 label
@@ -80,22 +81,13 @@ def learn(target_name="George_W_Bush", target_count=530):
 
     # train the model
     print("{}'s in the train dataset: {}/{}".format(target_name, np.sum(trn_lbls), len(trn_lbls)))
-    model.fit(trn_data, trn_lbls, verbose=1, epochs=4)
+    model.fit(trn_data, trn_lbls, verbose=1, epochs=5)
 
     return model, test_data, test_lbls
 
 
 if __name__ == "__main__":
-    accuracies = []
-
-    for _ in range(5):
-        cnn, data, labels = learn()
-
-        # Evaluate model on test data
-        print("\nFINAL EVALUATION RESULT...\n")
-        print("Pictures of the target in the test dataset: {}/{}".format(np.sum(labels), len(labels)))
-        acc = cnn.evaluate(x=data, y=labels)[1]
-        accuracies.append(round(acc, 4))
-
-    print(accuracies)
-    print("%.4f" % (sum(accuracies) / len(accuracies)))
+    cnn, data, labels = learn()
+    print("\nFINAL EVALUATION RESULT...\n")
+    print("Pictures of the target in the test dataset: {}/{}".format(np.sum(labels), len(labels)))
+    acc = cnn.evaluate(x=data, y=labels)[1]
