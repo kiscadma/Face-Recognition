@@ -18,13 +18,14 @@ def learn(target_name="George_W_Bush", target_count=530):
     f = open('lfw-names.txt')
     lines = f.readlines()
     np.random.shuffle(lines)  # randomize which non-target photos are included
+
     for line in lines:
-        info = line.split()
-        if info[0] == target_name:  # let's not add the target twice
+        name = line.split()[0]
+        if name == target_name:  # let's not add the target twice
             continue
 
         # add all photos for the non-target person with the 0 label
-        pics = glob.glob('lfw/' + info[0] + '/*.jpg')
+        pics = glob.glob('lfw/' + name + '/*.jpg')
         for pic in pics:
             all_data.append((img_to_array(load_img(pic, color_mode="grayscale", target_size=target_size)), 0))
 
@@ -46,7 +47,9 @@ def learn(target_name="George_W_Bush", target_count=530):
     for pic_arr, lbl in all_data[:train_test_split]:
         trn_data.append(pic_arr)
         trn_lbls.append(lbl)
-        trn_data.append(random_rotation(pic_arr, 15))  # add a rotated version of the picture
+
+        # add rotated versions of the picture
+        trn_data.append(random_rotation(pic_arr, 15))
         trn_lbls.append(lbl)
         trn_data.append(random_rotation(pic_arr, 30))
         trn_lbls.append(lbl)
@@ -73,9 +76,8 @@ def learn(target_name="George_W_Bush", target_count=530):
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Convolution2D(120, kernel_size=(3, 3)))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Convolution2D(150, kernel_size=(3, 3)))
     model.add(Flatten())
-    model.add(Dropout(.74))
+    model.add(Dropout(.5))
     model.add(Dense(1, activation='sigmoid'))  # Output Layer. 1==target, 0==not target
     model.compile(optimizer=opt, loss='binary_crossentropy', metrics=['accuracy'])
 
